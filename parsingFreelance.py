@@ -1,10 +1,5 @@
-from os import closerange
-import pandas as pd
-import numpy as np
-
-
 class Section(object):
-    df_data = []
+    fdata = []
     data = []
     fgr_row = []
     project = [0]
@@ -74,7 +69,7 @@ class Section(object):
                 and not self.__key_worte[15] in row
             ):
                 self.fgr_row.append(count)
-            self.data.append(row.strip().split(";"))
+            self.data.append(row)
 
     def get_project(self):
         pass
@@ -82,10 +77,30 @@ class Section(object):
     def get_areas(self):
         pass
 
+    def get_var(self):
+        pass
+
+    def get_msr(self):
+        pass
+
+    def get_data_msr(self):
+        pass
+
+    def get_hwm(self):
+        pass
+
+    def get_eam(self):
+        pass
+
     def get_data(self):
         self.get_project()
         self.get_areas()
-        return self.df_data
+        self.get_var()
+        self.get_msr()
+        self.get_data_msr()
+        self.get_hwm()
+        self.get_eam()
+        return self.fdata
 
 
 class Freelance(Section):
@@ -93,12 +108,29 @@ class Freelance(Section):
         if parsing is None:
             self.parseFreelance(input)
         else:
-            print("Auto parse Ausgeschaltet")
+            print("Auto parse nicht Aktiv")
 
     def get_project(self):
-        df = pd.DataFrame(self.data[self.project[0]])
-        self.df_data.append(df)
+        self.fdata.append(self.data[self.project[0]])
 
     def get_areas(self):
-        df = pd.DataFrame(self.data[self.area[0] : self.area[1]])
-        self.df_data.append(df)
+        self.fdata.append(self.data[self.area[0] : self.area[1]])
+
+    def get_var(self):
+        self.fdata.append(self.data[self.var[0] : self.var[1]])
+
+    def get_msr(self):
+        self.fdata.append(self.data[self.msr[0] : self.msr[1]])
+
+    def get_data_msr(self):
+        self.fdata.append(self.data[self.data_msr[0] : self.data_msr[1]])
+
+    # soll nur Notwendige daten speichern. Das steht aber noch aus.
+    def get_hwm(self):
+        self.fdata.append(self.data[self.hwm[0] : self.hwm[1]])
+
+    def get_eam(self):
+        self.fdata.append(self.data[self.eam[0] : self.eam[1]])
+
+
+# Grafikbilder auslesen fehlt noch.
