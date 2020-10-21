@@ -1,7 +1,6 @@
 class Section(object):
     fdata = []
     data = []
-    fgr_row = []
     project = [0]
     area = [0, 0]
     var = [0, 0]
@@ -23,9 +22,6 @@ class Section(object):
         "[END_HARDWAREMANAGER]",
         "[BEGIN_RESOURCEASSOCIATIONSECTION]",
         "[END_RESOURCEASSOCIATIONSECTION]",
-        "[PBV:OBJPATH]",
-        "FGRBLT",
-        "Pool",
     ]
 
     def __init__(self, input, parsing=None):
@@ -63,12 +59,6 @@ class Section(object):
                 self.eam[0] = count
             if self.__key_worte[12] in row:
                 self.eam[1] = count
-            if (
-                self.__key_worte[13] in row
-                and self.__key_worte[14] in row
-                and not self.__key_worte[15] in row
-            ):
-                self.fgr_row.append(count)
             self.data.append(row)
 
     def get_project(self):
@@ -131,6 +121,3 @@ class Freelance(Section):
 
     def get_eam(self):
         self.fdata.append(self.data[self.eam[0] : self.eam[1]])
-
-
-# Grafikbilder auslesen fehlt noch.
