@@ -91,27 +91,30 @@ class _msr:
 class _msrData:
     def __init__(self, msr_data):
         self.msr_data = msr_data[1:-1]
-        self.ld_bs = np.char.find(msr_data[1:-1], "[LAD:BSINST]")
-        self.ld_ref = np.char.find(msr_data[1:-1], "[LAD:MSR_REF]")
-        self.para_data = np.char.find(msr_data[1:-1], "[PARA:PARADATA]")
 
     def getDF(self):
         toggle = False
         df_dict = {}
         df_list = []
         key = ""
-        for count, status in enumerate(self.ld_bs):
+        typ = ""
+        # Suchen nach Key wörtern in der Liste
+        ld_bs = np.char.find(self.msr_data[1:-1], "[LAD:BSINST]")
+        ld_ref = np.char.find(self.msr_data[1:-1], "[LAD:MSR_REF]")
+        para_data = np.char.find(self.msr_data[1:-1], "[PARA:PARADATA]")
+        for count, status in enumerate(ld_bs):
             if status != -1:
                 typ = self.msr_data[count].strip().split(";")[3]
-                df_list.append(typ)
                 toggle = True
-            if toggle and self.ld_ref[count] != -1:
+            if toggle and ld_ref[count] != -1:
                 key = self.msr_data[count].strip().split(";")[1]
-                if self.para_data[count + 1] != -1:
+                if para_data[count + 1] != -1:
+                    df_list.append(typ)
                     para = self.msr_data[count + 1].strip().split(";")[1:]
                     df_list += para
                 df_dict.update({key: df_list})
                 df_list = []
+                typ = ""
                 key = ""
                 toggle = False
         return pd.DataFrame.from_dict(df_dict, orient="index")
@@ -135,6 +138,31 @@ class _msrData:
         return pd.DataFrame(data=fgr)
 
 
+class _hwm:
+    def __init__(self, hwm):
+        self.hwm = hwm
+
+    def getDF(self):
+        for i in self.hwm:
+            if "[HW2_BLOB]" in i:
+                continue
+            if "[HW2_NODE]" in i:
+                print(i)
+
+
+class _eam:
+    def __init__(self, eam):
+        self.eam = eam[1:-1]
+
+    def getDF(self):
+        df_dict = {}
+        for var in self.eam:
+            splitted_var = var.strip().split(";")
+            if len(splitted_var) > 2:
+                df_dict.update({splitted_var[2]: [splitted_var[3]]})
+        return pd.DataFrame.from_dict(df_dict, orient="index")
+
+
 class Evaluation:
     status = 0
 
@@ -148,6 +176,8 @@ class Evaluation:
             self.var = _var(args[2])
             self.msr = _msr(args[3])
             self.msrData = _msrData(args[4])
+            self.hwm = _hwm(args[5])
+            self.eam = _eam(args[6])
 
     def __str__(self):
         return str(self.status)
@@ -167,8 +197,14 @@ class Evaluation:
     def getMsrDataDF(self):
         return self.msrData.getDF()
 
-    def getGrafics(self):
+    def getGraficsDF(self):
         return self.msrData.getFgr()
+
+    def getHwmDF(self):
+        return self.hwm.getDF()
+
+    def getEamDF(self):
+        return self.eam.getDF()
 
 
 from readFile import *
@@ -179,5 +215,5 @@ filepath = "/Users/peterschwarz/VS Code Projekte/ParseClass/elektrolyse_20200326
 input = WorkWithFile(read, filepath).execute()
 parsed_data = Freelance(input).get_data()
 test = Evaluation(*parsed_data)
-print(test.getMsrDataDF())
+print(test.getHwmDF())
 print(test)
